@@ -33,7 +33,7 @@ done
 # get uncommented file
 awk '{ if(substr($1, 0, 1) != "#") {print $0} }' $input > tmp1
 # get only the download links and new names 
-awk -F',' '{print $10"\t"$11}' tmp1 > tmp2  
+awk -F',' '{print $9"\t"$10}' tmp1 > tmp2  
 # get only the download names
 awk -F'/' '{print $8}' tmp2 > $output
 rm tmp1 tmp2
