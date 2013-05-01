@@ -1,0 +1,474 @@
+\documentclass{article}\usepackage{graphicx, color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.2, 0.2, 0.2}
+\newcommand{\hlnumber}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlfunctioncall}[1]{\textcolor[rgb]{0.501960784313725,0,0.329411764705882}{\textbf{#1}}}%
+\newcommand{\hlstring}[1]{\textcolor[rgb]{0.6,0.6,1}{#1}}%
+\newcommand{\hlkeyword}[1]{\textcolor[rgb]{0,0,0}{\textbf{#1}}}%
+\newcommand{\hlargument}[1]{\textcolor[rgb]{0.690196078431373,0.250980392156863,0.0196078431372549}{#1}}%
+\newcommand{\hlcomment}[1]{\textcolor[rgb]{0.180392156862745,0.6,0.341176470588235}{#1}}%
+\newcommand{\hlroxygencomment}[1]{\textcolor[rgb]{0.43921568627451,0.47843137254902,0.701960784313725}{#1}}%
+\newcommand{\hlformalargs}[1]{\textcolor[rgb]{0.690196078431373,0.250980392156863,0.0196078431372549}{#1}}%
+\newcommand{\hleqformalargs}[1]{\textcolor[rgb]{0.690196078431373,0.250980392156863,0.0196078431372549}{#1}}%
+\newcommand{\hlassignement}[1]{\textcolor[rgb]{0,0,0}{\textbf{#1}}}%
+\newcommand{\hlpackage}[1]{\textcolor[rgb]{0.588235294117647,0.709803921568627,0.145098039215686}{#1}}%
+\newcommand{\hlslot}[1]{\textit{#1}}%
+\newcommand{\hlsymbol}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlprompt}[1]{\textcolor[rgb]{0.2,0.2,0.2}{#1}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ pdfstartview={XYZ null null 1}}
+\usepackage{breakurl}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+
+
+
+\author{Ricky Lim}
+\title{PCA Check after Gem-Mapping}
+\maketitle
+
+\begin{verbatim}
+  Filename: PCACheck.Rnw 
+  Working directory: /TEMP_DDN/users/gfilion/rlim/E14_ColorChromatin/PCACheckGemMapE14 
+\end{verbatim}
+
+\section{Load the input table}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+bigTable <- \hlfunctioncall{read.delim}(\hlstring{"input/E14_matBin.bed"})
+\hlfunctioncall{head}(bigTable)[1:5]
+\hlfunctioncall{dim}(bigTable)
+
+matTable <- bigTable[, 4:31]
+\hlfunctioncall{head}(matTable)[1:5]
+\hlfunctioncall{dim}(matTable)
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\section{Load the Annotation's file}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+annot <- \hlfunctioncall{read.delim}(\hlstring{"idE14_Fastq_annotation.txt"}, header = F)
+\hlfunctioncall{dim}(annot)
+\hlfunctioncall{head}(annot)[1:5]
+
+\hlcomment{# grep the file numbers}
+id_ <- \hlfunctioncall{sub}(\hlstring{".*-(\textbackslash{}\textbackslash{}d\{3\}|\textbackslash{}\textbackslash{}d\{3\}[ab]).*"}, \hlstring{"\textbackslash{}\textbackslash{}1"}, annot$V10)
+\hlfunctioncall{print}(id_)
+
+\hlcomment{# double check for the id mapping from annotation file with the colnames of the matrix}
+annot_dataset <- \hlfunctioncall{paste}(\hlstring{"X"}, id_, sep = \hlstring{""}) %in% \hlfunctioncall{colnames}(matTable)
+
+\hlcomment{# get the samples given the file no}
+sample_dataset <- annot$V12[annot_dataset]
+\hlfunctioncall{head}(sample_dataset)[1:5]
+\hlfunctioncall{length}(sample_dataset)
+
+\hlcomment{# function to get the file number in the loaded dataset given the sampleName}
+getProfileId <- \hlfunctioncall{function}(sampleName) \{
+    \hlfunctioncall{library}(stringr)
+\hlcomment{    # get only the partial match (in case!)}
+    sample_dataset <- \hlfunctioncall{str_extract}(sample_dataset, sampleName)
+    sample_ <- (sample_dataset == sampleName)
+    sample_no <- id_[annot_dataset][sample_]
+    sample_no <- sample_no[!\hlfunctioncall{is.na}(sample_no)]
+    sample_names <- \hlfunctioncall{paste}(\hlstring{"X"}, sample_no, sep = \hlstring{""})
+    \hlfunctioncall{return}(sample_names)
+\}
+
+\hlcomment{# e.g}
+\hlfunctioncall{getProfileId}(\hlstring{"Input"})
+
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\section{Assigning NAs}
+NAs were assigned for rows(genomic coordinates) in which in all profiles they were no reads
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+matTable[\hlfunctioncall{which}(\hlfunctioncall{rowSums}(matTable) == 0), ] <- NA
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\section{matTable no NAs}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+matTableNoNA <- matTable[\hlfunctioncall{complete.cases}(matTable), ]
+\hlfunctioncall{sum}(\hlfunctioncall{rowSums}(matTableNoNA[, ]) == 0)
+\hlfunctioncall{head}(matTableNoNA)[1:5]
+\hlfunctioncall{nrow}(matTableNoNA)/\hlfunctioncall{nrow}(matTable)
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\section{Create PCA Object}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+log_mat <- \hlfunctioncall{log}(matTableNoNA + 1)
+pca_mat <- \hlfunctioncall{prcomp}(log_mat, scale. = T)
+\hlfunctioncall{plot}(pca_mat, main = \hlstring{"Scree Plot"})
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\section{PCA Labs}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcomment{# order the PCA rotation matrix}
+lab_PCA <- pca_mat$rotation[\hlfunctioncall{order}(\hlfunctioncall{rownames}(pca_mat$rotation)), ]
+lab_PCA[\hlfunctioncall{c}(1, 6, 18, 27), \hlfunctioncall{c}(1, 2)]
+\hlfunctioncall{getProfileId}(\hlstring{"H3K4me1"})
+
+\hlcomment{# get the lab's info}
+lab_info <- annot$V1[annot_dataset]
+\hlfunctioncall{length}(\hlfunctioncall{rownames}(pca_mat$rotation))
+lab_info
+
+\hlcomment{# plot lab's effect}
+\hlfunctioncall{pdf}(\hlstring{"figs/lab_effect.pdf"}, useDingbats = FALSE)
+\hlfunctioncall{plot}(lab_PCA[, 1], lab_PCA[, 2], col = \hlfunctioncall{c}(\hlstring{"orange"}, \hlstring{"green"})[lab_info], pch = 19, xlab = \hlstring{"PC1"}, 
+    ylab = \hlstring{"PC2"}, frame = F, main = \hlstring{"Lab Effect"})
+
+\hlfunctioncall{legend}(y = 0.3, x = 0.205, pch = 19, cex = 1, col = \hlfunctioncall{c}(\hlstring{"orange"}, \hlstring{"green"}), legend = \hlfunctioncall{levels}(lab_info), 
+    box.lwd = 0, box.col = \hlstring{"white"}, bg = \hlstring{"white"})
+\hlfunctioncall{legend}(y = 0.23, x = 0.205, pch = 1, cex = 1, col = \hlfunctioncall{c}(\hlstring{"blue"}, \hlstring{"red"}, \hlstring{"black"}), legend = \hlfunctioncall{c}(\hlstring{"input"}, 
+    \hlstring{"H3K4me1"}, \hlstring{"H3K4me3"}), box.lwd = 0, box.col = \hlstring{"white"}, bg = \hlstring{"white"})
+
+\hlfunctioncall{points}(lab_PCA[\hlfunctioncall{getProfileId}(\hlstring{"Input"}), 1], lab_PCA[\hlfunctioncall{getProfileId}(\hlstring{"Input"}), 2], col = \hlstring{"blue"}, 
+    cex = 1.5)
+
+\hlfunctioncall{points}(lab_PCA[\hlfunctioncall{getProfileId}(\hlstring{"H3K4me1"}), 1], lab_PCA[\hlfunctioncall{getProfileId}(\hlstring{"H3K4me1"}), 2], col = \hlstring{"red"}, 
+    cex = 1.5)
+
+\hlfunctioncall{points}(lab_PCA[\hlfunctioncall{getProfileId}(\hlstring{"H3K4me3"}), 1], lab_PCA[\hlfunctioncall{getProfileId}(\hlstring{"H3K4me3"}), 2], col = \hlstring{"black"}, 
+    cex = 1.5)
+\hlfunctioncall{dev.off}()
+
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{figure*}
+  \includegraphics{figs/lab_effect.pdf}
+\end{figure*}
+The profiles from Ping and Synder's lab show two obvious clusters. 
+
+\pagebreak
+
+\section{Input Correlations}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlfunctioncall{cor}(matTableNoNA[, \hlfunctioncall{getProfileId}(\hlstring{"Input"})])
+\end{alltt}
+\begin{verbatim}
+##        X011a  X011b  X016a  X016b
+## X011a 1.0000 0.9827 1.0000 0.9827
+## X011b 0.9827 1.0000 0.9827 1.0000
+## X016a 1.0000 0.9827 1.0000 0.9827
+## X016b 0.9827 1.0000 0.9827 1.0000
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+Note samples id 016 and 011 are duplicated. In the PCA's figure (above, the loadings plots), these duplicated samples were on top of each other. They were similar samples that have been deposited in GEO database twice!.
+
+\section{PCA pairs}
+Check the figures of PCA pairs. The aim is to check if there is a chromosomal duplication or deletion (chromosomal abberation) that creates the clusters between Ping and Snyder labs. 
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+
+\hlcomment{# chromosomes pairs pairing from the longest to the shortest, chr1 chr20, chr2 chr10, ...}
+c1 <- \hlfunctioncall{str_c}(\hlstring{"chr"}, 1:10)
+c2 <- \hlfunctioncall{str_c}(\hlstring{"chr"}, 20:11)
+cpairs <- \hlfunctioncall{cbind}(c1, c2)
+
+chr_bigTable <- bigTable[, \hlfunctioncall{c}(1, 4:31)]
+\hlfunctioncall{head}(chr_bigTable)
+\hlfunctioncall{dim}(chr_bigTable)
+
+\hlcomment{# put NA if all the columns in a row contain only zero reads}
+chr_bigTable[\hlfunctioncall{which}(\hlfunctioncall{rowSums}(chr_bigTable[, 2:29]) == 0), 2:29] <- NA
+
+\hlcomment{# remove these NAs}
+chr_bigTable <- chr_bigTable[\hlfunctioncall{complete.cases}(chr_bigTable), ]
+\hlfunctioncall{head}(chr_bigTable)
+\hlfunctioncall{dim}(chr_bigTable)
+\hlfunctioncall{sum}(\hlfunctioncall{rowSums}(chr_bigTable[, 2:29]) == 0)
+
+\hlcomment{# create the matrixes of pairs}
+results <- \hlfunctioncall{list}()
+\hlfunctioncall{for} (i in 1:\hlfunctioncall{nrow}(cpairs)) \{
+    pair1 <- chr_bigTable[chr_bigTable$chr == cpairs[i, 1], 2:29]
+    pair2 <- chr_bigTable[chr_bigTable$chr == cpairs[i, 2], 2:29]
+    pair <- \hlfunctioncall{rbind}(pair1, pair2)
+    pairname <- \hlfunctioncall{paste}(cpairs[i, 1], cpairs[i, 2], sep = \hlstring{""})
+\hlcomment{    # assign(pairname, pair)}
+    results[[pairname]] <- \hlfunctioncall{rbind}(pair1, pair2)
+\}
+
+\hlcomment{# plot PCA on these pair matrices}
+\hlfunctioncall{for} (i in \hlfunctioncall{names}(results)) \{
+    log_mat <- \hlfunctioncall{log}(results[[i]] + 1)
+    pca_mat <- \hlfunctioncall{prcomp}(log_mat, scale. = T)
+    lab_PCA <- pca_mat$rotation[\hlfunctioncall{order}(\hlfunctioncall{rownames}(pca_mat$rotation)), ]
+    pic_f <- \hlfunctioncall{paste}(\hlstring{"figs"}, i, sep = \hlstring{"/"})
+    \hlfunctioncall{pdf}(\hlfunctioncall{paste}(pic_f, \hlstring{".pdf"}, sep = \hlstring{""}), useDingbats = FALSE)
+    \hlfunctioncall{plot}(lab_PCA[, 1], lab_PCA[, 2], col = \hlfunctioncall{c}(\hlstring{"red"}, \hlstring{"green"})[lab_info], pch = 19, xlab = \hlstring{"PC1"}, 
+        ylab = \hlstring{"PC2"}, frame = F, main = i)
+    \hlfunctioncall{dev.off}()
+\}
+
+
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+
+The artefacts clusters between Ping and Snyder's lab seem not to be affected by single chromosomals duplication or insertion. This suggests for a possible genome-wide bias between Ping and Snyder's profiles. 
+
+\subsection{Genomic Loci that might cause bias}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+chr1chr20Log_mat <- \hlfunctioncall{log}(results[[\hlstring{"chr1chr20"}]] + 1)
+\hlfunctioncall{head}(chr1chr20Log_mat)
+\hlfunctioncall{dim}(chr1chr20Log_mat)
+pca_chr1chr20 <- \hlfunctioncall{prcomp}(chr1chr20Log_mat, scale. = T)
+\hlfunctioncall{names}(pca_chr1chr20)
+\hlfunctioncall{head}(pca_chr1chr20$x)
+
+\hlcomment{# plot(pca_chr1chr20$x[,1], pca_chr1chr20$x[,2], xlab='PC1', ylab='PC2',}
+\hlcomment{# main='Chr1Chr20', cex=2) identify(pca_chr1chr20$x) rownames that are clustered together}
+\hlcomment{# exclusively at the bottom left corner}
+rownames_diff <- \hlfunctioncall{c}(2521, 2522, 6207, 6426, 8206, 8207, 8755, 8756, 13345, 13346, 28616, 28617, 
+    30445, 30841, 34689, 35305, 43541, 43542)
+
+chr1chr20 <- results[[\hlstring{"chr1chr20"}]]
+\hlfunctioncall{head}(chr1chr20)
+\hlfunctioncall{head}(bigTable)
+
+\hlfunctioncall{getProfileId}(\hlstring{"H3K4me1"})
+coordinates <- bigTable[, \hlfunctioncall{c}(1:30)]
+selected_coordinates <- coordinates[rownames_diff, ]
+\hlfunctioncall{head}(selected_coordinates)
+
+\hlcomment{# map this to hg19 library(ggbio) library(rtracklayer) source('data.frame2GRanges.R')}
+\hlcomment{# select_ <- data.frame2GRanges(selected_coordinates) head(select_)}
+
+\hlcomment{# library(BSgenome.Mmusculus.UCSC.mm10) chr.len = seqlengths(Mmusculus) exclude}
+\hlcomment{# chromosomes with suffix '_' , 'M', 'Het', 'extra'. chr.len =}
+\hlcomment{# chr.len[grep('_|M|U|Het|extra', names(chr.len), invert = T)]}
+
+\hlcomment{# select_ = keepSeqlevels(select_, names(chr.len)) seqlevels(select_) = names(chr.len)}
+\hlcomment{# seqlengths(select_) = (chr.len) p <- autoplot(select_, layout = 'karyogram')}
+
+
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+
+\subsection{Check for the Sequence Content}
+Sequence content being checked was AT and low-complexity.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+
+\hlcomment{# map the coordinate of big table with the coordinate of the sequence contents/bin}
+\hlfunctioncall{head}(bigTable)
+chr1_big <- bigTable[bigTable$chr == \hlstring{"chr1"}, ]
+\hlfunctioncall{nrow}(chr1_big)
+\hlfunctioncall{head}(chr1_big)
+
+\hlcomment{# seqContent: AT and LowComplexity}
+chr1_seqContent <- \hlfunctioncall{read.delim}(\hlstring{"chr1_seqContent.bed"}, header = FALSE)
+\hlfunctioncall{head}(chr1_seqContent)
+\hlfunctioncall{colnames}(chr1_seqContent) <- \hlfunctioncall{c}(\hlstring{"chr"}, \hlstring{"start"}, \hlstring{"end"}, \hlstring{"AT"}, \hlstring{"LowComplexity"})
+chr1_seqCheck <- \hlfunctioncall{cbind}(chr1_big, chr1_seqContent[, \hlfunctioncall{c}(\hlstring{"AT"}, \hlstring{"LowComplexity"})])
+\hlfunctioncall{dim}(chr1_seqCheck)
+\hlfunctioncall{head}(chr1_seqCheck)
+chr1_seqCheck[, 4:31][\hlfunctioncall{which}(\hlfunctioncall{rowSums}(chr1_seqCheck[, 4:31]) == 0), ] <- NA
+chr1_seqCheck <- chr1_seqCheck[\hlfunctioncall{complete.cases}(chr1_seqCheck), ]
+
+\hlcomment{# construct pca}
+AT_content <- \hlfunctioncall{matrix}(chr1_seqCheck[, 32])
+LowSeq_content <- \hlfunctioncall{matrix}(chr1_seqCheck[, 33])
+\hlfunctioncall{rownames}(AT_content) <- \hlfunctioncall{rownames}(chr1_seqCheck)
+\hlfunctioncall{head}(AT_content)
+\hlfunctioncall{rownames}(LowSeq_content) <- \hlfunctioncall{rownames}(chr1_seqCheck)
+\hlfunctioncall{head}(LowSeq_content)
+
+log_matSeq <- \hlfunctioncall{log}(chr1_seqCheck[, \hlfunctioncall{c}(4:31)] + 1)
+pca_matSeq <- \hlfunctioncall{prcomp}(log_matSeq, scale. = T)
+\hlfunctioncall{names}(pca_matSeq)
+pca_matSeqScores <- \hlfunctioncall{cbind}(pca_matSeq$x, AT_content, LowSeq_content)
+\hlfunctioncall{head}(pca_matSeqScores)
+\hlfunctioncall{dim}(pca_matSeqScores)
+\hlfunctioncall{rownames}(pca_matSeq$rotation) <- lab_info
+
+\hlcomment{# biplot PCAs for AT-content biplot}
+\hlcomment{# function:http://stackoverflow.com/questions/6578355/plotting-pca-biplot-with-ggplot2}
+col_gradientAT <- \hlfunctioncall{colorRampPalette}(\hlfunctioncall{c}(\hlstring{"green"}, \hlstring{"green"}, \hlstring{"green"}, \hlstring{"black"}, \hlstring{"red"}, \hlstring{"red"}, \hlstring{"red"}))(1024)
+lab_info
+
+PCbiplot <- \hlfunctioncall{function}(PC, x = \hlstring{"PC1"}, y = \hlstring{"PC2"}) \{
+\hlcomment{    # PC being a prcomp object}
+    data <- \hlfunctioncall{data.frame}(obsnames = \hlfunctioncall{row.names}(PC$x), PC$x)
+\hlcomment{    # pca_matSeqScores col 29: AT-content}
+    plot <- \hlfunctioncall{ggplot}(data, \hlfunctioncall{aes_string}(x = x, y = y)) + \hlfunctioncall{geom_point}(\hlfunctioncall{aes}(label = obsnames), color = col_gradientAT[pca_matSeqScores[, 
+        29] * 1024])
+    plot <- plot + \hlfunctioncall{geom_hline}(\hlfunctioncall{aes}(0), size = 0.2) + \hlfunctioncall{geom_vline}(\hlfunctioncall{aes}(0), size = 0.2)
+    datapc <- \hlfunctioncall{data.frame}(varnames = \hlfunctioncall{rownames}(PC$rotation), PC$rotation)
+    mult <- \hlfunctioncall{min}((\hlfunctioncall{max}(data[, y]) - \hlfunctioncall{min}(data[, y])/(\hlfunctioncall{max}(datapc[, y]) - \hlfunctioncall{min}(datapc[, y]))), (\hlfunctioncall{max}(data[, 
+        x]) - \hlfunctioncall{min}(data[, x])/(\hlfunctioncall{max}(datapc[, x]) - \hlfunctioncall{min}(datapc[, x]))))
+    datapc <- \hlfunctioncall{transform}(datapc, v1 = 0.7 * mult * (\hlfunctioncall{get}(x)), v2 = 0.7 * mult * (\hlfunctioncall{get}(y)))
+    plot <- plot + \hlfunctioncall{geom_segment}(data = datapc, \hlfunctioncall{aes}(x = 0, y = 0, xend = v1, yend = v2), arrow = \hlfunctioncall{arrow}(length = \hlfunctioncall{unit}(0.2, 
+        \hlstring{"cm"})), alpha = 0.75, color = \hlfunctioncall{c}(\hlstring{"orange"}, \hlstring{"blue"})[lab_info])
+    plot
+\}
+
+\hlcomment{# create biplot}
+
+\hlcomment{# color gradient for low, medium, to high}
+\hlfunctioncall{library}(ggplot2)
+\hlfunctioncall{library}(grid)
+\hlfunctioncall{pdf}(\hlstring{"figs/AT_content.pdf"}, useDingbats = FALSE)
+p <- \hlfunctioncall{PCbiplot}(pca_matSeq)
+\hlfunctioncall{plot.new}()
+P <- p + \hlfunctioncall{annotate}(\hlstring{"segment"}, x = -20, xend = -23, y = 8, yend = 8, size = 0.5, arrow = \hlfunctioncall{arrow}(length = \hlfunctioncall{unit}(0.2, 
+    \hlstring{"cm"})), color = \hlstring{"orange"}) + \hlfunctioncall{annotate}(\hlstring{"text"}, x = -18, y = 8, label = \hlstring{"Ren"}, size = 3) + 
+    \hlfunctioncall{annotate}(\hlstring{"segment"}, x = -20, xend = -23, y = 7, yend = 7, size = 0.5, arrow = \hlfunctioncall{arrow}(length = \hlfunctioncall{unit}(0.2, 
+        \hlstring{"cm"})), color = \hlstring{"blue"}) + \hlfunctioncall{annotate}(\hlstring{"text"}, x = -18, y = 7, label = \hlstring{"Snyder"}, size = 3)
+P
+\hlfunctioncall{legend}(\hlstring{"topleft"}, pch = 19, cex = 0.8, col = \hlfunctioncall{c}(\hlstring{"red"}, \hlstring{"black"}, \hlstring{"green"}), legend = \hlfunctioncall{c}(\hlstring{"High"}, 
+    \hlstring{"Medium"}, \hlstring{"Low"}), box.lwd = 0, box.col = \hlstring{"transparent"}, bg = \hlstring{"transparent"})
+
+\hlfunctioncall{dev.off}()
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+From PC2, the biplot shows that there is a gradient separation in the AT-content between Ren and Snyder's labs, as shown in figure below.
+
+\begin{figure*}
+  \includegraphics[page=2]{figs/AT_content.pdf}
+\end{figure*}
+\pagebreak
+
+
+\section{Metainfo}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlfunctioncall{sessionInfo}()
+\end{alltt}
+\begin{verbatim}
+## R version 2.15.0 (2012-03-30)
+## Platform: x86_64-unknown-linux-gnu (64-bit)
+## 
+## locale:
+## [1] C
+## 
+## attached base packages:
+## [1] grid      stats     graphics  grDevices datasets  utils     methods   base     
+## 
+## other attached packages:
+##  [1] stringr_0.6       ggplot2_0.9.3     codetools_0.2-8   Cairo_1.5-1      
+##  [5] knitr_1.2         vimcom_0.9-8      setwidth_1.0-3    cacheSweave_0.6-1
+##  [9] stashR_0.3-5      filehash_2.2-1   
+## 
+## loaded via a namespace (and not attached):
+##  [1] MASS_7.3-17        RColorBrewer_1.0-5 colorspace_1.1-1   dichromat_1.2-4   
+##  [5] digest_0.5.2       evaluate_0.4.3     formatR_0.7        gtable_0.1.2      
+##  [9] labeling_0.1       munsell_0.3        plyr_1.7.1         proto_0.3-9.2     
+## [13] reshape2_1.2.1     scales_0.2.3       tools_2.15.0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+
+
+
+\end{document}

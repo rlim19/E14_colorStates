@@ -6,7 +6,6 @@
 \setcounter{secnumdepth}{2}
 \setcounter{tocdepth}{2}
 \usepackage{url}
-\usepackage{graphicx, subfigure}
 \usepackage[unicode=true,pdfusetitle,
  bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
  breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
@@ -217,6 +216,7 @@ for (i in names(results)) {
 
 @
 
+
 The artefacts clusters between Ping and Snyder's lab seem not to be affected by single chromosomals duplication or insertion. This suggests for a possible genome-wide bias between Ping and Snyder's profiles. 
 
 \subsection{Genomic Loci that might cause bias}
@@ -338,17 +338,16 @@ P <- p +annotate("segment",x=-20,xend=-23,y=8,yend=8,size=0.5,arrow=arrow(length
 P
 legend("topleft", pch = 19, cex=0.8,
           col=c("red","black", "green"), legend=c("High", "Medium", "Low"),
-          box.lwd = 0,box.col = "white",bg ="transparent")
+          box.lwd = 0,box.col = "transparent",bg ="transparent")
 
 dev.off()
 @
 
 From PC2, the biplot shows that there is a gradient separation in the AT-content between Ren and Snyder's labs, as shown in figure below.
 
-\section{AT-Content}
-\begin{figure}
+\begin{figure*}
   \includegraphics[page=2]{figs/AT_content.pdf}
-\end{figure}
+\end{figure*}
 \pagebreak
 
 

@@ -277,7 +277,7 @@ cor(matTableNoNA[, getProfileId('Input')])
 ## P
 ## legend("topleft", pch = 19, cex=0.8,
 ##           col=c("red","black", "green"), legend=c("High", "Medium", "Low"),
-##           box.lwd = 0,box.col = "white",bg ="transparent")
+##           box.lwd = 0,box.col = "transparent",bg ="transparent")
 ## 
 ## dev.off()
 
